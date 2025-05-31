@@ -6,11 +6,4 @@ data class GameState(
 	val isGameOver: Boolean = false,
 )
 
-fun emptyGrid(): List<List<Int>> {
-	return listOf(
-		listOf(0, 0, 0, 0),
-		listOf(0, 0, 0, 0),
-		listOf(0, 0, 0, 0),
-		listOf(0, 0, 0, 0)
-	)
-}
+fun emptyGrid(): List<List<Int>> = List(4) { List(4) { 0 } }
