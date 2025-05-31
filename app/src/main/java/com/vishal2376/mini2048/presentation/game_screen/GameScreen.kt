@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,12 +31,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vishal2376.mini2048.presentation.game_screen.component.TileComponent
 import com.vishal2376.mini2048.ui.theme.Mini2048Theme
+import com.vishal2376.mini2048.ui.theme.Tile64
 import com.vishal2376.mini2048.utils.Constants
 import kotlin.math.abs
 
@@ -53,6 +57,9 @@ fun GameScreen(
 	gameState: GameState,
 	onEvent: (GameEvent) -> Unit
 ) {
+
+	val haptic = LocalHapticFeedback.current
+
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -73,25 +80,12 @@ fun GameScreen(
 			modifier = Modifier
 				.fillMaxSize()
 				.background(MaterialTheme.colorScheme.background)
-				.padding(innerPadding)
-				.padding(16.dp),
-			verticalArrangement = Arrangement.spacedBy(24.dp),
-		) {
-
-			// Score
-			Text(
-				text = "Score: ${gameState.score}",
-				style = MaterialTheme.typography.headlineMedium,
-				modifier = Modifier.align(Alignment.CenterHorizontally)
-			)
-
-			// Grid
-			LazyVerticalGrid(
-				columns = GridCells.Fixed(4),
-				modifier = Modifier
-					.clip(RoundedCornerShape(24.dp))
-					.pointerInput(Unit) {
-						detectDragGestures { change, dragAmount ->
+				.pointerInput(Unit) {
+					detectDragGestures(
+						onDragEnd = { ->
+							haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+						},
+						onDrag = { change, dragAmount ->
 							val (x, y) = dragAmount
 							if (abs(x) > abs(y)) {
 								when {
@@ -116,7 +110,25 @@ fun GameScreen(
 							}
 							change.consume()
 						}
-					}
+					)
+				}
+				.padding(innerPadding)
+				.padding(16.dp),
+			verticalArrangement = Arrangement.spacedBy(24.dp),
+		) {
+
+			// Score
+			Text(
+				text = "Score: ${gameState.score}",
+				style = MaterialTheme.typography.headlineMedium,
+				modifier = Modifier.align(Alignment.CenterHorizontally)
+			)
+
+			// Grid
+			LazyVerticalGrid(
+				columns = GridCells.Fixed(4),
+				modifier = Modifier
+					.clip(RoundedCornerShape(24.dp))
 					.fillMaxWidth()
 					.aspectRatio(1f)
 					.background(MaterialTheme.colorScheme.primaryContainer),
@@ -135,9 +147,25 @@ fun GameScreen(
 				Text(
 					text = "Game Over",
 					style = MaterialTheme.typography.headlineLarge,
-					color = Color.Red,
+					color = Tile64,
 					modifier = Modifier.align(Alignment.CenterHorizontally)
 				)
+
+				Button(
+					onClick = { onEvent(GameEvent.Restart) },
+					modifier = Modifier
+						.align(Alignment.CenterHorizontally),
+					shape = RoundedCornerShape(16.dp),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = Tile64,
+						contentColor = MaterialTheme.colorScheme.onBackground,
+					)
+				) {
+					Text(
+						modifier = Modifier.padding(8.dp), text = "Restart Game",
+						style = MaterialTheme.typography.bodyLarge
+					)
+				}
 			}
 		}
 	}
