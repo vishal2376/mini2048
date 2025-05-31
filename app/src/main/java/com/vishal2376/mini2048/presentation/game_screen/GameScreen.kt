@@ -1,6 +1,7 @@
 package com.vishal2376.mini2048.presentation.game_screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,10 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vishal2376.mini2048.presentation.game_screen.component.TileComponent
 import com.vishal2376.mini2048.ui.theme.Mini2048Theme
+import com.vishal2376.mini2048.utils.Constants
+import kotlin.math.abs
 
 @Composable
 fun GameScreenRoot(viewModel: GameViewModel) {
@@ -85,11 +89,38 @@ fun GameScreen(
 			LazyVerticalGrid(
 				columns = GridCells.Fixed(4),
 				modifier = Modifier
-					.clip(RoundedCornerShape(16.dp))
+					.clip(RoundedCornerShape(24.dp))
+					.pointerInput(Unit) {
+						detectDragGestures { change, dragAmount ->
+							val (x, y) = dragAmount
+							if (abs(x) > abs(y)) {
+								when {
+									x > Constants.SWIPE_THRESHOLD -> {
+										onEvent(GameEvent.Move(Direction.RIGHT))
+									}
+
+									x < -Constants.SWIPE_THRESHOLD -> {
+										onEvent(GameEvent.Move(Direction.LEFT))
+									}
+								}
+							} else {
+								when {
+									y > Constants.SWIPE_THRESHOLD -> {
+										onEvent(GameEvent.Move(Direction.DOWN))
+									}
+
+									y < -Constants.SWIPE_THRESHOLD -> {
+										onEvent(GameEvent.Move(Direction.UP))
+									}
+								}
+							}
+							change.consume()
+						}
+					}
 					.fillMaxWidth()
 					.aspectRatio(1f)
 					.background(MaterialTheme.colorScheme.primaryContainer),
-				contentPadding = PaddingValues(8.dp),
+				contentPadding = PaddingValues(12.dp),
 				verticalArrangement = Arrangement.spacedBy(8.dp),
 				horizontalArrangement = Arrangement.spacedBy(8.dp),
 				userScrollEnabled = false
