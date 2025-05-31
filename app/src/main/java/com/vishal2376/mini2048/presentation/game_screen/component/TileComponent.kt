@@ -1,6 +1,7 @@
 package com.vishal2376.mini2048.presentation.game_screen.component
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -16,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vishal2376.mini2048.ui.theme.TileSuper
@@ -35,6 +38,15 @@ fun TileComponent(value: Int) {
 		label = "Tile Scale"
 	)
 
+	val tileRadius by animateDpAsState(
+		targetValue = if (value != 0) 16.dp else 40.dp,
+		animationSpec = tween(
+			durationMillis = 400,
+			easing = FastOutSlowInEasing
+		),
+		label = "Tile Radius"
+	)
+
 	val tileAlpha by animateFloatAsState(
 		targetValue = if (value != 0) 1f else 0f,
 		animationSpec = tween(durationMillis = 600),
@@ -51,7 +63,7 @@ fun TileComponent(value: Int) {
 				alpha = tileAlpha
 			}
 			.aspectRatio(1f)
-			.background(TileColors.backgroundColor(value), RoundedCornerShape(16.dp))
+			.background(TileColors.backgroundColor(value), RoundedCornerShape(tileRadius))
 			.padding(4.dp),
 		contentAlignment = Alignment.Center
 	) {
